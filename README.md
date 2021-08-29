@@ -4,7 +4,16 @@ This file provides instructions to run the model.
 # Description
 This model is an implementation of Deep Q learning for the purpose of Home Energy Management.
 
-## Install DEPENDENCIES
+# Requirements
+### Python
+You need Python to run the model.
+
+In Ubuntu, Mint and Debian you can install Python 3 like this:
+```bash
+$ sudo apt-get install python3 python3-pip
+```
+
+### Dependencies
 Some of the dependencies required to run the code, and some info about the environment (e.g., reward, actions, etc.).
 
  - tensorflow (>= 2.3)
