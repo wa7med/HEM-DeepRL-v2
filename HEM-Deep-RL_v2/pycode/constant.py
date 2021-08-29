@@ -1,0 +1,17 @@
+class Actions:
+	NO_ACTION = 0
+	CHARGE_HOME_wPV = 1
+	CHARGE_HOME_wSG = 2
+	CHARGE_EV_wPV = 3
+	CHARGE_EV_wSG = 4
+	
+class Specifications:
+	HOME_CAPACITY = 100
+	EV_CAPACITY = 100
+	EV_DAILY_CONSUME = 11
+	EV_CHARGE_WINDOW = [18, 6]
+	MAX_CHARGE_FOR_HOUR = 11
+
+class Constant:
+	MONTHS_LEN = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+	MAX_STEP_HOURS = 24 * 30
