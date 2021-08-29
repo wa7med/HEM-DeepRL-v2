@@ -1,5 +1,8 @@
-# HEM-DeepRL-v2
-This file provides the instructions to run the model.
+# Home Energy Management Model.
+This file provides instructions to run the model.
+
+# Description
+This model is an implementation of Deep Q learning for the purpose of Home Energy Management.
 
 ## Install DEPENDENCIES
 Some of the dependencies required to run the code, and some info about the environment (e.g., reward, actions, etc.).
@@ -25,7 +28,8 @@ There are 3 simple command line interface to run the code for training, testing 
 ```python
 C:\Project_PATH>python main.py -train_model <number_of_Episodes>
 ```
-(note that 300 Episodes should be enough)
+_`note that`_ **300 Episodes** _`should be enough`_.
+
 
 
 ### - Test a trained model (I've already provided a trained model in the "trained_models" folder)
@@ -34,17 +38,29 @@ C:\Project_PATH>python main.py -test_model
 ```
 
 
-### - Data plotting of the trained model:
-You can plot one of the graph: "money_spent", "battery_charge", "reward_function"
 
+### - Data plotting of the trained model:
+You can plot one of the graphs: "money_spent", "battery_charge", "reward_function"
+
+#### 1- Output ( Money spent):
 ```python
 C:\Project_PATH>python main.py -plot_graph money_spent
 ```
+![alt text](images/money_spent.png "Money spent")
 
+
+#### 2- Output ( Battery charge):
 ```python
 C:\Project_PATH>python main.py -plot_graph battery_charge
 ```
+![alt text](images/battery_charge.png "Battery charge")
 
+
+#### 3- Output ( Reward function):
 ```python
 C:\Project_PATH>python main.py -plot_graph reward_function
 ```
+![alt text](images/reward_function.png "reward_function")
+
+
+## License
