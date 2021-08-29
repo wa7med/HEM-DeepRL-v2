@@ -21,22 +21,30 @@ C:\Project_PATH>pip install matplotlib
 ## Usage
 There are 3 simple command line interface to run the code for training, testing and ploting:
 
-- Train a new model (this will save the model only at the end of the training):
+### - Train a new model (this will save the model only at the end of the training):
 ```python
 C:\Project_PATH>python main.py -train_model <number_of_Episodes>
 ```
 (note that 300 Episodes should be enough)
 
 
-- Test a trained model (I've already provided a trained model in the "trained_models" folder)
+### - Test a trained model (I've already provided a trained model in the "trained_models" folder)
 ```python
 C:\Project_PATH>python main.py -test_model
 ```
 
 
-- Plot data of the trained model:
+### - Data plotting of the trained model:
 You can plot one of the graph: "money_spent", "battery_charge", "reward_function"
 
 ```python
 C:\Project_PATH>python main.py -plot_graph money_spent
+```
+
+```python
+C:\Project_PATH>python main.py -plot_graph battery_charge
+```
+
+```python
+C:\Project_PATH>python main.py -plot_graph reward_function
 ```
