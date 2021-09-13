@@ -116,3 +116,61 @@ class DoubleLinePlotter():
 		# Final Plot
 		plt.show()
 		
+
+class GenerationPlotter():
+
+	def __init__(self, pv, grid, battery_charge):
+		self.pv = pv
+		self.grid = grid
+		self.battery_charge = battery_charge
+
+	def plot( self ):
+		fig, ax = plt.subplots()
+		axes = [ax, ax.twinx()]
+		fig.subplots_adjust(right=0.86)
+		ax.set_xlabel('Time (h)')
+
+		# Plot on Axis 1: Battery consupmtion
+		X = [str(i) for i in range(24)]
+		axes[0].bar(X, self.battery_charge, color='blue', label="Battery Discharge")
+		axes[0].bar(X, self.pv, color='red', label="PV")
+		axes[0].bar(X, self.grid, color='green', label="Grid")
+		axes[0].set_ylabel("Energy (kWh)", color='black')
+		axes[0].tick_params(axis='y', colors='black')
+		axes[0].legend(loc='upper right', fontsize=14)
+
+		# Plot on Axis 2: Price
+		#axes[1].plot(self.price, linestyle='-', color='red', linewidth=1.2)
+		#axes[1].set_ylabel('Price (kWh)', color='red')
+		#axes[1].tick_params(axis='y', colors='red')
+
+		# Final Plot
+		plt.show()
+
+class DemandsPlotter():
+
+	def __init__(self, house_demands, battery_charge):
+		self.house_demands = house_demands
+		self.battery_charge = battery_charge
+
+	def plot( self ):
+		fig, ax = plt.subplots()
+		axes = [ax, ax.twinx()]
+		fig.subplots_adjust(right=0.86)
+		ax.set_xlabel('Time (h)')
+
+		# Plot on Axis 1: Battery consupmtion
+		X = [str(i) for i in range(24)]
+		axes[0].bar(X, self.battery_charge, color='green', label="Battery Charge")
+		axes[0].bar(X, self.house_demands, color='blue', label="House Demands")
+		axes[0].set_ylabel("Energy (kWh)", color='black')
+		axes[0].tick_params(axis='y', colors='black')
+		axes[0].legend(loc='upper right', fontsize=14)
+
+		# Plot on Axis 2: Price
+		#axes[1].plot(self.price, linestyle='-', color='red', linewidth=1.2)
+		#axes[1].set_ylabel('Price (kWh)', color='red')
+		#axes[1].tick_params(axis='y', colors='red')
+
+		# Final Plot
+		plt.show()
