@@ -55,21 +55,34 @@ You can plot one of the graphs: "money_spent", "battery_charge", "reward_functio
 ```python
 C:\Project_PATH>python main.py -plot_graph money_spent
 ```
-![alt text](images/money_spent.png "Money spent")
+![alt text](results/money_spent.png "Money spent")
 
 
 #### 2- Output ( Battery charge):
 ```python
 C:\Project_PATH>python main.py -plot_graph battery_charge
 ```
-![alt text](images/battery_charge.png "Battery charge")
+![alt text](results/battery_charge.png "Battery charge")
 
 
 #### 3- Output ( Reward function):
 ```python
 C:\Project_PATH>python main.py -plot_graph reward_function
 ```
-![alt text](images/reward_function.png "reward_function")
+![alt text](results/reward_function.png "reward_function")
 
+
+#### 4- Output ( Demans):
+```python
+C:\Project_PATH>python main.py -plot_graph demands
+```
+![alt text](results/demands.png "Demands")
+
+
+#### 5- Output ( Generation):
+```python
+C:\Project_PATH>python main.py -plot_graph generation
+```
+![alt text](results/generation.png "Generation")
 
 ## License
