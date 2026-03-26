@@ -1,88 +1,227 @@
-# Home Energy Management Model.
-This file provides instructions to run the model.
+# HEM-DeepRL-v2 — Home Energy Management with Deep Reinforcement Learning
 
-# Description
-This model is an implementation of Deep Q learning for the purpose of Home Energy Management.
+A Deep Reinforcement Learning framework for optimizing residential energy management. The agent learns to minimize electricity costs by intelligently scheduling battery charging from solar panels (PV) and the smart grid (SG), while ensuring the electric vehicle (EV) is always ready for daily use.
 
-# Requirements
-### Python
-You need Python to run the model.
+---
 
-In Ubuntu, Mint and Debian you can install Python 3 like this:
-```bash
-$ sudo apt-get install python3 python3-pip
+## Table of Contents
+
+- [Overview](#overview)
+- [Project Structure](#project-structure)
+- [Environment](#environment)
+- [Algorithms](#algorithms)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Results](#results)
+- [License](#license)
+
+---
+
+## Overview
+
+This project models a smart home equipped with:
+
+- A **home battery** (100 kWh capacity)
+- An **electric vehicle battery** (100 kWh capacity, 11 kWh daily consumption)
+- A **photovoltaic (PV) solar panel** system
+- A connection to the **smart grid (SG)**
+
+A Deep RL agent is trained using **Proximal Policy Optimization (PPO)** to decide, at each hour, whether to charge the home or EV battery from either PV or the grid — or take no action. The goal is to **minimize the total annual electricity cost** while meeting household demand and keeping the EV charged.
+
+---
+
+## Project Structure
+
+```
+HEM-DeepRL-v2/
+├── main.py                  # Entry point: training, testing, and plotting
+├── algos/
+│   ├── mcPPO.py             # Monte Carlo PPO (Actor-Critic)
+│   └── DQN.py               # Double DQN with experience replay
+├── pycode/
+│   ├── smart_home.py        # Gym-style smart home environment
+│   ├── constant.py          # Action definitions and system specifications
+│   ├── processed_data.py    # Data access layer for PV, prices, and consumption
+│   ├── plotter.py           # Visualization utilities
+│   └── train_dqn.py         # DQN training script
+├── data/
+│   ├── H4.csv               # Household power consumption (minute-level)
+│   ├── PV.csv               # Photovoltaic production data
+│   └── Prices.csv           # Smart grid electricity prices
+├── trained_models/
+│   └── neural_network_trained.h5   # Pre-trained PPO model
+├── generated/               # Reward logs from training runs
+└── results/                 # Output plots
 ```
 
-### Dependencies
-Some of the dependencies required to run the code, and some info about the environment (e.g., reward, actions, etc.).
+---
 
- - tensorflow (>= 2.3)
- - numpy
- - Pandas
- - matplotlib
+## Environment
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install them.
+The smart home environment follows the **OpenAI Gym** interface.
 
-```bash
-C:\Project_PATH>pip install tensorflow
-C:\Project_PATH>pip install numpy
-C:\Project_PATH>pip install Pandas
-C:\Project_PATH>pip install matplotlib
-```
+### State Space (5 dimensions, normalized to [0, 1])
+
+| Feature             | Description                        |
+|---------------------|------------------------------------|
+| `month`             | Current month of the year          |
+| `day`               | Current day of the month           |
+| `time`              | Current hour of the day            |
+| `home_battery`      | Home battery state of charge       |
+| `ev_battery`        | EV battery state of charge         |
+
+### Action Space (5 discrete actions)
+
+| Action | Description                          |
+|--------|--------------------------------------|
+| 0      | No action                            |
+| 1      | Charge home battery from PV          |
+| 2      | Charge home battery from smart grid  |
+| 3      | Charge EV battery from PV            |
+| 4      | Charge EV battery from smart grid    |
+
+### Reward Design
+
+- **Primary**: Negative electricity cost (in euros) for the current time step
+- **Penalty (-10)**: EV not sufficiently charged by 6:00 AM
+- **Penalty (-10)**: Attempting to charge the EV during work hours (6:00–18:00)
+
+### Episode
+
+Each episode spans **720 time steps** (24 hours x 30 days), starting from a random date and battery state.
+
+---
+
+## Algorithms
+
+### Proximal Policy Optimization (PPO)
+- **Actor-Critic** architecture with two 64-unit hidden layers
+- Supports both **discrete** and **continuous** action spaces
+- Clipped surrogate objective (clip value = 0.2)
+- Discount factor (gamma) = 0.99
+- Network updates every 5 episodes
+
+### Double DQN
+- Two 64-unit hidden layers with **soft target updates** (tau = 0.005)
+- Experience replay buffer (size = 2000)
+- Epsilon-greedy exploration with decay (0.995)
+- Discount factor (gamma) = 0.95
+
+---
+
+## Installation
+
+### Prerequisites
+
+- Python 3.8+
+- pip
+
+### Setup
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/wa7med/HEM-DeepRL-v2.git
+   cd HEM-DeepRL-v2
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   pip install tensorflow numpy pandas matplotlib gym
+   ```
+
+---
 
 ## Usage
-There are 3 simple command line interface to run the code for training, testing and ploting:
 
-### - Train a new model (this will save the model only at the end of the training):
-```python
-C:\Project_PATH>python main.py -train_model <number_of_Episodes>
-```
-_`note that`_ **300 Episodes** _`should be enough`_.
+All commands should be run from the project root directory.
 
+### Train a New Model
 
-
-### - Test a trained model (I've already provided a trained model in the "trained_models" folder)
-```python
-C:\Project_PATH>python main.py -test_model
+```bash
+python main.py -train_model <number_of_episodes>
 ```
 
+> 300 episodes is typically sufficient for convergence.
 
-
-### - Data plotting of the trained model:
-You can plot one of the graphs: "money_spent", "battery_charge", "reward_function"
-
-#### 1- Output ( Money spent):
-```python
-C:\Project_PATH>python main.py -plot_graph money_spent
+**Example:**
+```bash
+python main.py -train_model 300
 ```
-![alt text](results/money_spent.png "Money spent")
 
+The trained model will be saved to `trained_models/neural_network_trained.h5`.
 
-#### 2- Output ( Battery charge):
-```python
-C:\Project_PATH>python main.py -plot_graph battery_charge
+### Test a Trained Model
+
+```bash
+python main.py -test_model
 ```
-![alt text](results/battery_charge.png "Battery charge")
 
+A pre-trained model is included in the `trained_models/` directory.
 
-#### 3- Output ( Reward function):
-```python
-C:\Project_PATH>python main.py -plot_graph reward_function
+### Plot Results
+
+```bash
+python main.py -plot_graph <graph_type>
 ```
-![alt text](results/reward_function.png "reward_function")
 
+Available graph types: `money_spent`, `battery_charge`, `reward_function`, `demands`, `generation`
 
-#### 4- Output ( Demans):
-```python
-C:\Project_PATH>python main.py -plot_graph demands
+---
+
+## Results
+
+### Money Spent (Trained vs. Random)
+
+Comparison of monthly electricity costs between the trained PPO agent (**171.79 EUR/year**) and a random policy (**1141.75 EUR/year**) — an **85% cost reduction**.
+
+```bash
+python main.py -plot_graph money_spent
 ```
-![alt text](results/demands.png "Demands")
 
+![Money Spent](results/money_spent.png)
 
-#### 5- Output ( Generation):
-```python
-C:\Project_PATH>python main.py -plot_graph generation
+### Battery Charging Strategy
+
+The agent learns to charge from the grid during **off-peak hours** (midnight, late evening) and leverage **PV during daytime** — aligning charging with low prices.
+
+```bash
+python main.py -plot_graph battery_charge
 ```
-![alt text](results/generation.png "Generation")
+
+![Battery Charge](results/battery_charge.png)
+
+### Reward Function Convergence
+
+The PPO agent converges within approximately **150 episodes**, with the reward stabilizing near zero (minimal cost).
+
+```bash
+python main.py -plot_graph reward_function
+```
+
+![Reward Function](results/reward_function.png)
+
+### House Demands vs. Battery Charge
+
+Hourly household energy demand overlaid with battery charging activity.
+
+```bash
+python main.py -plot_graph demands
+```
+
+![Demands](results/demands.png)
+
+### Energy Generation Sources
+
+Breakdown of energy supply by source: battery discharge, PV generation, and grid imports.
+
+```bash
+python main.py -plot_graph generation
+```
+
+![Generation](results/generation.png)
+
+---
 
 ## License
+
+This project is developed as part of a Master's thesis research.
