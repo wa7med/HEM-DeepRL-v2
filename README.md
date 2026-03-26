@@ -9,7 +9,9 @@ A Deep Reinforcement Learning framework for optimizing residential energy manage
 - [Overview](#overview)
 - [Project Structure](#project-structure)
 - [Environment](#environment)
+- [Data Format](#data-format)
 - [Algorithms](#algorithms)
+- [Parameter Settings](#parameter-settings)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Results](#results)
@@ -92,6 +94,54 @@ Each episode spans **720 time steps** (24 hours x 30 days), starting from a rand
 
 ---
 
+## Data Format
+
+The model reads three CSV files from the `data/` directory. You can replace them with your own data as long as you follow the format described below. All files use **semicolon (`;`)** as the delimiter.
+
+### `PV.csv` — Photovoltaic Production
+
+Hourly solar panel output in kWh. Must contain **8,760 rows** (365 days x 24 hours). Decimal separator: **dot (`.`)**.
+
+```
+Time;P_PV_
+01.01.16 00:00;0
+01.01.16 01:00;0
+01.01.16 06:00;0.523
+...
+```
+
+### `Prices.csv` — Smart Grid Electricity Prices
+
+Hourly electricity price in EUR/MWh. Must contain **8,760 rows**. Decimal separator: **comma (`,`)**. The code converts prices from EUR/MWh to EUR/kWh internally.
+
+```
+Time;Price;;
+01.01.16 00:00;22,39;;
+01.01.16 01:00;20,59;;
+...
+```
+
+### `H4.csv` — Household Power Consumption
+
+Minute-level power consumption in kWh. Must contain **525,600 rows** (365 days x 24 hours x 60 minutes). The code aggregates every 60 rows into hourly values. Decimal separator: **comma (`,`)**.
+
+```
+Time;Power
+01.01.17 00:00;0,00129330485928748
+01.01.17 00:01;0,00123732723485149
+...
+```
+
+### Using Custom Data
+
+To use your own data:
+1. Prepare your CSV files following the column names and formats above
+2. Ensure the data covers a full year (365 days)
+3. Place the files in the `data/` directory with the same filenames (`PV.csv`, `Prices.csv`, `H4.csv`)
+4. Adjust the system parameters in `pycode/constant.py` if your battery specs differ
+
+---
+
 ## Algorithms
 
 ### Proximal Policy Optimization (PPO)
@@ -106,6 +156,58 @@ Each episode spans **720 time steps** (24 hours x 30 days), starting from a rand
 - Experience replay buffer (size = 2000)
 - Epsilon-greedy exploration with decay (0.995)
 - Discount factor (gamma) = 0.95
+
+---
+
+## Parameter Settings
+
+Below is a detailed reference of all configurable parameters in the project.
+
+### System Specifications (`pycode/constant.py`)
+
+| Parameter              | Value   | Description                                      |
+|------------------------|---------|--------------------------------------------------|
+| `HOME_CAPACITY`        | 100 kWh | Maximum capacity of the home battery             |
+| `EV_CAPACITY`          | 100 kWh | Maximum capacity of the EV battery               |
+| `EV_DAILY_CONSUME`     | 11 kWh  | Energy the EV consumes per day                   |
+| `MAX_CHARGE_FOR_HOUR`  | 11 kWh  | Maximum energy that can be charged in one hour   |
+| `EV_CHARGE_WINDOW`     | [18, 6] | Hours when the EV is available for charging      |
+| `MAX_STEP_HOURS`       | 720     | Episode length in hours (24h x 30 days)          |
+
+### PPO Hyperparameters (`algos/mcPPO.py`)
+
+| Parameter              | Value   | Description                                      |
+|------------------------|---------|--------------------------------------------------|
+| `gamma`                | 0.99    | Discount factor for cumulative rewards           |
+| `batch_size`           | 128     | Mini-batch size for network updates              |
+| `epoch`                | 10      | Number of optimization epochs per update         |
+| `clip_val`             | 0.2     | PPO clipping range for the surrogate objective   |
+| `sigma`                | 1.0     | Initial exploration noise (continuous only)       |
+| `exploration_decay`    | 1.0     | Sigma decay rate (no decay by default)           |
+| Hidden layers          | 2 x 64  | Actor and critic network architecture            |
+| Optimizer              | Adam    | Optimizer with default learning rate             |
+| Update frequency       | Every 5 episodes | Buffer is cleared after each update     |
+
+### DQN Hyperparameters (`algos/DQN.py`)
+
+| Parameter              | Value   | Description                                      |
+|------------------------|---------|--------------------------------------------------|
+| `gamma`                | 0.95    | Discount factor for future rewards               |
+| `batch_size`           | 32      | Mini-batch size sampled from replay buffer       |
+| `memory_size`          | 2000    | Maximum replay buffer capacity                   |
+| `exploration_rate`     | 1.0     | Initial epsilon for epsilon-greedy exploration   |
+| `exploration_decay`    | 0.995   | Epsilon decay rate per episode                   |
+| `tau`                  | 0.005   | Soft update rate for the target network          |
+| Hidden layers          | 2 x 64  | Network architecture                             |
+| Optimizer              | Adam    | Optimizer with default learning rate             |
+
+### Reward Function Parameters (`pycode/smart_home.py`)
+
+| Parameter              | Value   | Description                                      |
+|------------------------|---------|--------------------------------------------------|
+| Cost penalty           | `-cost` | Negative of electricity cost at each step        |
+| EV not ready penalty   | -10     | Applied at 6:00 AM if EV charge < daily need     |
+| EV charge during work  | -10     | Applied if EV is charged between 6:00–18:00      |
 
 ---
 
